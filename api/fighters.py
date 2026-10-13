@@ -1,6 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
-from models import FighterInput
-from models import FighterModel
+from models import FighterInput, FighterModel, FighterUpdate
 
 fighter1 = FighterModel(id = 1, speed = 100)
 fighter2 = FighterModel(id = 2, speed = 200)
@@ -20,24 +19,38 @@ def get_fighter(fighter_id: int) -> FighterModel:
             return fighter
     raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "Истребителдь не найден")
 
-@router.post("//")
+@router.post("/")
 def create_fighter(fighter: FighterInput) -> FighterModel:
 	new_fighter_id = len(fighters_list) + 1
 	new_fighter = FighterModel(id = new_fighter_id, speed = fighter.speed)
 	fighters_list.append(new_fighter)
-	print(fighters_list)
 	return new_fighter
 
 
-# @app.put()
+@router.put("/{fighter_id}")
+def update_fighter(fighter_id: int, fighter_update: FighterUpdate) -> FighterModel:
+
+    update_data = fighter_update.model_dump(exclude_unset = True)
+
+    if not update_data:
+            raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST, detail = "Не передано ни одного из аргументов")
+
+    for fighter in fighters_list:
+        if fighter.id == fighter_id:
+                for key, value in update_data.items():
+                    # !!!!ERROR HERE
+                    fighter[key] = value
+                return fighter
+    raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "Истребитель не найден")
+      
 
 @router.delete("/{fighter_id}")
 def delete_fighter(fighter_id: int) -> FighterModel:
-	for fighter in fighters_list:
-		if fighter.id == fighter_id:
-			fighters_list.remove(fighter)
-			return fighter
-    # ERROR
-    
+    for fighter in fighters_list:
+    	if fighter.id == fighter_id:
+            fighters_list.remove(fighter)
+            return fighter
+    raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "Истребитель не найден")
+
 
 
