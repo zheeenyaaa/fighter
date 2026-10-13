@@ -4,7 +4,6 @@
 /api/v1/fighters/{fighter_id}
 
 
-
 # POST
 
 /api/v1/fighters
